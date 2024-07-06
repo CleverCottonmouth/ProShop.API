@@ -1,7 +1,7 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser";
-import logger from './src/utils/logger.js';
+import logger from './utils/logger.js';
 import morgan from 'morgan';
 
 const morganFormat = ':method :url :status :response-time ms';
@@ -36,7 +36,7 @@ app.use(morgan(morganFormat, {
 
 // routes import
 
-import healthCheck from "./src/routes/health.routes.js"
+import healthCheck from "./routes/health.routes.js"
 
 
 
