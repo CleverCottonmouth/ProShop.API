@@ -21,7 +21,13 @@
   },
   "homepage": "https://github.com/CleverCottonmouth/ProShop.API#readme",
   "dependencies": {
-    "express": "^4.19.2"
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "logger": "^0.0.1",
+    "mongoose": "^8.4.5",
+    "morgan": "^1.10.0",
+    "winston": "^3.13.0"
   },
   "devDependencies": {
     "dotenv": "^16.4.5",
