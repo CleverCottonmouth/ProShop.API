@@ -37,6 +37,7 @@ app.use(morgan(morganFormat, {
 // routes import
 
 import healthCheck from "./routes/health.routes.js"
+import getProducts from "./routes/product.routes.js"
 
 
 
@@ -44,6 +45,7 @@ import healthCheck from "./routes/health.routes.js"
 //routes declarations
 
 app.use("/",healthCheck)
+app.use("/api/product",getProducts)
 
 
 
