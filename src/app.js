@@ -8,14 +8,14 @@ const morganFormat = ':method :url :status :response-time ms';
 const app = express()
 
 const corsOptions = {
-  origin: 'http://localhost:3000/',
+  origin: "*",
   credentials: true,
   optionSuccessStatus: 200
 }
 app.use(cors(corsOptions));
 
 app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', "http://localhost:3000");
+    res.header('Access-Control-Allow-Origin', "*");
     res.header('Access-Control-Allow-Headers', true);
     res.header('Access-Control-Allow-Credentials', true);
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
@@ -47,7 +47,7 @@ app.use(morgan(morganFormat, {
 
 import healthCheck from "./routes/health.routes.js"
 import productRoutes from './routes/product.routes.js';
-
+import userRoutes from "./routes/user.routes.js";
 
 
 
@@ -55,6 +55,7 @@ import productRoutes from './routes/product.routes.js';
 
 app.use("/",healthCheck)
 app.use('/api/products', productRoutes);
+app.use('/api/users', userRoutes);
 
 
 
