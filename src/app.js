@@ -3,7 +3,8 @@ import cors from "cors"
 import cookieParser from "cookie-parser";
 import logger from './utils/logger.js';
 import morgan from 'morgan';
-
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './swagger.json' assert { type: 'json' };
 const morganFormat = ':method :url :status :response-time ms';
 const app = express()
 
@@ -52,7 +53,8 @@ import userRoutes from "./routes/user.routes.js";
 
 
 //routes declarations
-
+app.use('/api-docs', swaggerUi.serve);
+app.get('/api-docs', swaggerUi.setup(swaggerDocument));
 app.use("/",healthCheck)
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
