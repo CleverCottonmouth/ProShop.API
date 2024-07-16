@@ -49,6 +49,7 @@ app.use(morgan(morganFormat, {
 import healthCheck from "./routes/health.routes.js"
 import productRoutes from './routes/product.routes.js';
 import userRoutes from "./routes/user.routes.js";
+import orderRoutes from './routes/order.routes.js'
 
 
 
@@ -58,6 +59,7 @@ app.get('/api-docs', swaggerUi.setup(swaggerDocument));
 app.use("/",healthCheck)
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/orders', orderRoutes);
 
 
 
