@@ -1,3 +1,4 @@
+import path from 'path';
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser";
@@ -5,6 +6,7 @@ import logger from './utils/logger.js';
 import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocument from './swagger.json' assert { type: 'json' };
+import { notFound, errorHandler } from './middleware/error.middleware.js';
 const morganFormat = ':method :url :status :response-time ms';
 const app = express()
 
@@ -49,8 +51,8 @@ app.use(morgan(morganFormat, {
 import healthCheck from "./routes/health.routes.js"
 import productRoutes from './routes/product.routes.js';
 import userRoutes from "./routes/user.routes.js";
-import orderRoutes from './routes/order.routes.js'
-
+import orderRoutes from './routes/order.routes.js';
+import uploadRoutes from './routes/upload.routes.js';
 
 
 //routes declarations
@@ -60,12 +62,14 @@ app.use("/",healthCheck)
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/upload', uploadRoutes);
 
 
 app.get('/api/config/paypal', (req, res) =>
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID })
 );
 
-
+app.use(notFound);
+app.use(errorHandler);
 
 export {app}
