@@ -1,60 +1,102 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
-import User from "../models/user.model.js";
-import generateToken from "../utils/generateToken.js";
+import {User} from "../models/user.model.js";
+import  {ApiError}  from "../utils/apiError.js";
+import  {ApiResponse}  from '../utils/apiResponse.js';
+import {generateAccessAndRefereshTokens} from '../utils/generateToken.js'
+
 
 
 const authUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
+  const {name, email, password } = req.body;
+  
 
-  if (user && (await user.matchPassword(password))) {
-    generateToken(res, user._id);
-
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-    });
-  } else {
-    res.status(401);
-    throw new Error('Invalid email or password');
+  if (!name && !email) {
+    throw new ApiError(400, "user or email is required");
   }
+
+  const user = await User.findOne({
+    $or: [{ name }, { email }],
+  });
+
+  if (!user) {
+    throw new ApiError(404, "User does not exist");
+  }
+
+  const isPasswordValid = await user.isPasswordCorrect(password);
+
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid user credentials");
+  }
+
+  const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
+    user._id
+  );
+
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          user: loggedInUser,
+          accessToken,
+          refreshToken,
+        },
+        "User logged In Successfully"
+      )
+    );
 });
 
 // @desc    Register a new user
 // @route   POST /api/users
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
 
-  const userExists = await User.findOne({ email });
+  const {name, email, password } = req.body;
 
-  if (userExists) {
-    res.status(400);
-    throw new Error('User already exists');
+  if (
+    [ name ,email, password].some((field) => field?.trim() === "")
+  ) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  const existedUser = await User.findOne({
+    $or: [{ email }],
+  });
+
+  if (existedUser) {
+    throw new ApiError(409, "User with email already exists");
   }
 
   const user = await User.create({
     name,
     email,
-    password,
+    password, 
   });
 
-  if (user) {
-    generateToken(res, user._id);
+  const createdUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
 
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      isAdmin: user.isAdmin,
-    });
-  } else {
-    res.status(400);
-    throw new Error('Invalid user data');
+  if (!createdUser) {
+    throw new ApiError(500, "Something went wrong while registering the user");
   }
+
+  return res
+    .status(201)
+    .json(new ApiResponse(200, createdUser, "User registered Successfully"));
 });
 
 // @desc    Logout user / clear cookie

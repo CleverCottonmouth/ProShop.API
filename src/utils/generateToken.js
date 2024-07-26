@@ -1,17 +1,25 @@
-import jwt from 'jsonwebtoken';
+import {User} from "../models/user.model.js";
+import  {ApiError}  from "../utils/apiError.js";
 
-const generateToken = (res, userId) => {
-  const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: '30d',
-  });
 
-  // Set JWT as an HTTP-Only cookie
-  res.cookie('jwt', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV !== 'development', // Use secure cookies in production
-    sameSite: 'strict', // Prevent CSRF attacks
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-  });
+
+const generateAccessAndRefereshTokens = async (userId) => {
+  try {
+    
+    const user = await User.findById(userId);
+    console.log("data",user);
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+    console.log("accessToken",accessToken);
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new ApiError(
+      500,
+      "Something went wrong while generating referesh and access token"
+    );
+  }
 };
-
-export default generateToken;
+export {generateAccessAndRefereshTokens};
